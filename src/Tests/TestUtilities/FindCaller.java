@@ -56,21 +56,25 @@ public class FindCaller {
     }
 
     private static void saveDataFile() {
-        try {
-            FileOutputStream fileOut = new FileOutputStream(dataFile);
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+        try (FileOutputStream fileOut = new FileOutputStream(dataFile);
+             ObjectOutputStream objectOut = new ObjectOutputStream(fileOut)) {
             objectOut.writeObject(methodInvocations);
-            objectOut.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private static void loadDataFile() throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream(dataFile);
-        ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-        methodInvocations = (HashMap<String, HashMap<String, InvocationInfo>>) objectIn.readObject();
-        objectIn.close();
+        ObjectInputStream objectIn = null;
+        try {
+            FileInputStream fileIn = new FileInputStream(dataFile);
+            objectIn = new ObjectInputStream(fileIn);
+            methodInvocations = (HashMap<String, HashMap<String, InvocationInfo>>) objectIn.readObject();
+        }
+        finally {
+            if (objectIn != null)
+                objectIn.close();
+        }
     }
 
     public static String getTestName() {
